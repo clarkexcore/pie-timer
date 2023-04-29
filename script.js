@@ -18,13 +18,22 @@ function drawPieSlice(
 	radius,
 	startAngle,
 	endAngle,
-	pattern
+	pattern,
+	isShadow
 ) {
 	ctx.save();
 	ctx.beginPath();
 	ctx.moveTo(centerX, centerY);
 	ctx.arc(centerX, centerY, radius, startAngle, endAngle);
 	ctx.closePath();
+
+	if (isShadow) {
+		ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+		ctx.shadowBlur = 10;
+		ctx.shadowOffsetX = 3;
+		ctx.shadowOffsetY = 3;
+	}
+
 	ctx.clip();
 
 	if (pattern) {
@@ -43,15 +52,12 @@ function getCurrentTimePercentage() {
 	const now = new Date();
 	const hours = now.getHours();
 	const minutes = now.getMinutes();
-
-	// If it's exactly 12 AM or 12 PM, return 0 (empty chart)
-	if ((hours === 0 || hours === 12) && minutes === 0) {
-		return 0;
-	}
-
-	const adjustedHours = hours % 12;
-	const totalMinutes = adjustedHours * 60 + minutes;
-	return totalMinutes / 720;
+	const seconds = now.getSeconds();
+	const milliseconds = now.getMilliseconds();
+	const twelveHour =
+		(hours % 12) + minutes / 60 + seconds / 3600 + milliseconds / 3600000;
+	const percentage = 1 - twelveHour / 12;
+	return percentage;
 }
 
 function drawPieChart() {
@@ -68,20 +74,20 @@ function drawPieChart() {
 		150,
 		-0.5 * Math.PI,
 		1.5 * Math.PI,
-		null
+		"#fff"
 	);
 
 	// Draw filled slice based on time, only if percentage is not 0
 	if (percentage !== 0) {
-		const endAngle = -0.5 * Math.PI + percentage * 2 * Math.PI;
+		const startAngle = 1.5 * Math.PI - percentage * 2 * Math.PI;
 		const pattern = ctx.createPattern(img, "repeat");
 		drawPieSlice(
 			ctx,
 			canvas.width / 2,
 			canvas.height / 2,
 			150,
-			-0.5 * Math.PI,
-			endAngle,
+			startAngle,
+			1.5 * Math.PI,
 			pattern
 		);
 	}
@@ -89,3 +95,4 @@ function drawPieChart() {
 	// Call drawPieChart again in the next animation frame
 	requestAnimationFrame(drawPieChart);
 }
+  
