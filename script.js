@@ -1,3 +1,11 @@
+// Start drawing the pie chart
+const img = new Image();
+img.src = "./cookie2.png";
+img.onload = function () {
+	// Start drawing the pie chart when the image is loaded
+	drawPieChart();
+};
+
 const canvas = document.getElementById("pieChart");
 const ctx = canvas.getContext("2d");
 canvas.width = 300;
@@ -10,14 +18,25 @@ function drawPieSlice(
 	radius,
 	startAngle,
 	endAngle,
-	color
+	pattern
 ) {
-	ctx.fillStyle = color;
+	ctx.save();
 	ctx.beginPath();
 	ctx.moveTo(centerX, centerY);
 	ctx.arc(centerX, centerY, radius, startAngle, endAngle);
 	ctx.closePath();
-	ctx.fill();
+	ctx.clip();
+
+	if (pattern) {
+		const imgWidth = img.width;
+		const imgHeight = img.height;
+		const x = centerX - imgWidth / 2;
+		const y = centerY - imgHeight / 2;
+		ctx.fillStyle = pattern;
+		ctx.fillRect(x, y, imgWidth, imgHeight);
+	}
+
+	ctx.restore();
 }
 
 function getCurrentTimePercentage() {
@@ -49,12 +68,13 @@ function drawPieChart() {
 		150,
 		-0.5 * Math.PI,
 		1.5 * Math.PI,
-		"#e0e0e0"
+		null
 	);
 
 	// Draw filled slice based on time, only if percentage is not 0
 	if (percentage !== 0) {
 		const endAngle = -0.5 * Math.PI + percentage * 2 * Math.PI;
+		const pattern = ctx.createPattern(img, "repeat");
 		drawPieSlice(
 			ctx,
 			canvas.width / 2,
@@ -62,13 +82,10 @@ function drawPieChart() {
 			150,
 			-0.5 * Math.PI,
 			endAngle,
-			"#4CAF50"
+			pattern
 		);
 	}
 
 	// Call drawPieChart again in the next animation frame
 	requestAnimationFrame(drawPieChart);
 }
-
-// Start drawing the pie chart
-drawPieChart();
