@@ -60,6 +60,11 @@ function getCurrentTimePercentage() {
 	return percentage;
 }
 
+function updatePieChart() {
+	drawPieChart(getCurrentTimePercentage());
+	requestAnimationFrame(updatePieChart);
+}
+
 function drawPieChart(animatedPercentage) {
 	const percentage = getCurrentTimePercentage();
 
@@ -102,6 +107,6 @@ function animatePieChart() {
 		duration: animationDuration,
 		ease: "power1.out",
 		onUpdate: () => drawPieChart(animatedPercentage.value),
-		// onComplete: () => requestAnimationFrame(animatePieChart),
+		onComplete: updatePieChart,
 	});
 }
